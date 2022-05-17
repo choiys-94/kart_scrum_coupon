@@ -1,0 +1,141 @@
+{% include 'header.html' %}
+<div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem;">
+    <h2>쿠폰 사용</h2><br />
+    <div class="mb-3">
+        <label for="username" class="form-label">
+            <h4>계정</h4>
+        </label>
+        <input class="form-control" list="datalistOptions" id="username" name="username" placeholder="계정 입력 / 선택"
+            oninput="check_id()">
+        <datalist id="datalistOptions">
+            {% for user in users %}
+            <option value="{{ user[0] }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="mb-3">
+        <label for="userid" class="form-label">
+            <h4>계정번호</h4>
+        </label>
+        <input type="text" class="form-control" id="userid" name="userid" placeholder="자동 입력" disabled>
+    </div>
+    <div class="mb-3">
+        <label for="coupon" class="form-label">
+            <h4>쿠폰코드</h4>
+        </label>
+        <input type="text" class="form-control" id="coupon" name="coupon" placeholder="쿠폰코드 입력">
+    </div>
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary mb-3" onclick="check_coupon()">확인</button>
+    </div>
+</div>
+
+<div style="margin-top: 3rem;"></div>
+<div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem">
+    <h2>계정 추가</h2><br />
+    <div class="mb-3">
+        <label for="c_username" class="form-label">
+            <h4>계정명</h4>
+        </label>
+        <input type="text" class="form-control" id="c_username" name="username" placeholder="ex. 선이">
+    </div>
+    <div class="mb-3">
+        <label for="c_userid" class="form-label">
+            <h4>계정번호</h4>
+        </label>
+        <input type="text" class="form-control" id="c_userid" name="userid" placeholder="ex. 07901CQ10406Q">
+    </div>
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary mb-3" onclick="create_account()">확인</button>
+    </div>
+</div>
+</div>
+<script>
+    function create_account() {
+        let username = document.getElementById("c_username").value;
+        let userid = document.getElementById("c_userid").value;
+        let password = prompt("비밀번호를 입력해주세요.");
+
+        if (password) {
+            $.ajax({
+                type: "POST",
+                url: "/api/coupon/create_account",
+                data: "username=" + username + "&userid=" + userid + "&password=" + password,
+                dataType: "text",
+                success: function (data) {
+                    alert(data);
+                    location.reload();
+                }
+            });
+        }
+    }
+
+    function submit_coupon(userid, coupon, account_id, account_name) {
+        $.ajax({
+            type: "POST",
+            url: "/api/coupon/submit_coupon",
+            data: "userid=" + userid + "&coupon=" + coupon + "&account_id=" + account_id + "&account_name=" + account_name,
+            dataType: "json",
+            success: function (data) {
+                if (data.result == "false") {
+                    alert(data.message);
+                }
+                else {
+                    alert("쿠폰 사용 완료!");
+                }
+            }
+        });
+    }
+
+    function check_coupon() {
+        if (document.getElementById("userid").value == "") {
+            alert("계정번호 확인");
+            return;
+        }
+        if (document.getElementById("coupon").value == "") {
+            alert("쿠폰번호 확인");
+            return;
+        }
+        let userid = document.getElementById("userid").value;
+        let coupon = document.getElementById("coupon").value;
+
+        $.ajax({
+            type: "POST",
+            url: "/api/coupon/check_coupon",
+            data: "userid=" + userid + "&coupon=" + coupon,
+            dataType: "json",
+            success: function (data) {
+                if (data.result == "false") {
+                    alert(data.message);
+                }
+                else {
+                    data = data.info[0];
+                    if (confirm("계정명이 " + data.name + " 이(가) 맞습니까?")) {
+                        submit_coupon(userid, coupon, data.id, data.name);
+                    }
+                }
+            }
+        });
+    }
+
+    function check_id() {
+        let username = document.getElementById("username").value;
+
+        $.ajax({
+            type: "POST",
+            url: "/api/coupon/check_id",
+            data: "username=" + username,
+            dataType: "text",
+            success: function (data) {
+                if (data == "Error") {
+                    document.getElementById("userid").value = "";
+                }
+                else {
+                    document.getElementById("userid").value = data;
+                }
+            }
+        });
+    }
+</script>
+
+{% include 'footer.html' %}

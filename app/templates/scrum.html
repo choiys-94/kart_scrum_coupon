@@ -1,0 +1,323 @@
+{% include 'header.html' %}
+<div class="container" style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: center;">
+    <span style="display: inline-block; font-size: 2rem; color: white" id="today" onclick="create_message()"></span>
+</div>
+<table class="table table-light text-center">
+    <thead>
+        <tr class="table-warning">
+            <th scope="col">시간</th>
+            <th scope="col">1번</th>
+            <th scope="col">2번</th>
+            <th scope="col">3번</th>
+            <th scope="col">4번</th>
+        </tr>
+    </thead>
+    <tbody id="scrum">
+    </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+<!-- Hidden Modal Button -->
+<input type="hidden" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"
+    id="modal_trigger"></input>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">처음이신가요?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container" style="padding: 1rem 1rem 0.5rem 1rem;">
+                    <div class="mb-3">
+                        <label for="c_username" class="form-label">
+                            <h4>닉네임</h4>
+                        </label>
+                        <input type="text" class="form-control" id="c_username" name="c_username" placeholder="ex. 선이">
+                    </div>
+                    <div class="mb-3">
+                        <label for="c_class" class="form-label">
+                            <h4>군</h4>
+                        </label>
+                        <br />
+
+                        <input type="radio" class="btn-check" name="c_class" id="powermain-outlined" autocomplete="off"
+                            onclick="select_class(1)">
+                        <label class="btn btn-outline-danger" for="powermain-outlined">강주</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="main-outlined" autocomplete="off"
+                            onclick="select_class(2)">
+                        <label class="btn btn-outline-warning" for="main-outlined">주</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="first-outlined" autocomplete="off"
+                            onclick="select_class(3)">
+                        <label class="btn btn-outline-primary" for="first-outlined">1</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="second-outlined" autocomplete="off"
+                            onclick="select_class(4)">
+                        <label class="btn btn-outline-success" for="second-outlined">2</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="third-outlined" autocomplete="off"
+                            onclick="select_class(5)">
+                        <label class="btn btn-outline-info" for="third-outlined">3</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="forth-outlined" autocomplete="off"
+                            onclick="select_class(6)">
+                        <label class="btn btn-outline-dark" for="forth-outlined">4</label>
+
+                        <input type="radio" class="btn-check" name="c_class" id="normal-outlined" autocomplete="off"
+                            onclick="select_class(7)">
+                        <label class="btn btn-outline-secondary" for="normal-outlined">일</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-target="#myModal2"
+                        data-bs-toggle="modal">이미 계정이 있어요!</button>
+                    <button type="button" class="btn btn-primary" onclick="create_account()">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalToggleLabel2">계정을 선택해주세요.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="font-size: 2rem;">
+                {% for user in users %}
+                    <span onclick="select_user('{{ user[0] }}')">
+                    {{ user[0] }}
+                    (
+                        {% if user[1] == 7 %}
+                            일반
+                        {% elif user[1] == 2 %}
+                            주력
+                        {% elif user[1] == 1 %}
+                            강주력
+                        {% else %}
+                            {{ user[1] - 2 }}군
+                        {% endif %}
+                    )
+                    </span>
+                    <br />
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-target="#myModal" data-bs-toggle="modal">이전</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<textarea id="message" style="height: 100%; opacity: 0.8; background: transparent; border: 0px; resize: none; color: white; font-size: 1.5rem; margin: 1rem 0 0 1rem;" disabled></textarea>
+
+</body>
+
+<script>
+    if (!document.cookie) {
+        const modal_trigger = document.getElementById("modal_trigger");
+        modal_trigger.click();
+    }
+    else {
+        const username_element = document.getElementById("username_element");
+        username_element.innerText = get_username();
+    }
+
+    const class_color = {
+        "1": "red",
+        "2": "orange",
+        "3": "blue",
+        "4": "green",
+        "5": "skyblue",
+        "6": "black",
+        "7": "grey"
+    }
+
+    var userclass = "";
+    function select_class(c_userclass) {
+        userclass = c_userclass;
+    }
+
+    function create_account() {
+        let username = document.getElementById("c_username").value;
+        if(userclass == ""){
+            alert("군을 선택해주세요.");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/create_user",
+            data: "username=" + username + "&class=" + userclass,
+            dataType: "text",
+            success: function (data) {
+                set_cookie(username);
+                document.body.style.zomm = 1;
+                location.reload();
+            }
+        });
+    }
+
+    function set_cookie(username) {
+        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;"
+    }
+
+    function delete_cookie() {
+        document.cookie = "username=; expires=Thu, 01 Jan 1999 00:00:10 GMT;";
+        location.reload();
+    }
+
+    function get_username() {
+        return decodeURIComponent(document.cookie.split("name=")[1]);
+    }
+
+    function scrum_submit(hour, team) {
+        let username = get_username();
+
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/scrum_submit",
+            data: `username=${username}&hour=${hour}&team=${team}`,
+            dataType: "text",
+            success: function (data) {
+                scrum_data();
+            }
+        });
+    }
+    
+    function scrum_data_member() {
+        $.ajax({
+            type: "GET",
+            url: "/api/scrum/scrum_data",
+            dataType: "json",
+            success: function (data) {
+                const scrum = document.getElementById("scrum");
+                data.forEach(d => {
+                    const hour = d[0];
+                    const team = d[1];
+                    const member = d[2];
+                    let userclass = d[3];
+                    let template = `<span style="color:${class_color[userclass]};" class="${userclass}">`;
+                    if(userclass == 1){
+                        userclass = "강";
+                    }
+                    else if(userclass == 2){
+                        userclass = "주";
+                    }
+                    else if(userclass < 7){
+                        userclass = `${userclass - 2}`
+                    }
+                    else{
+                        userclass = "일"
+                    }
+                    const row = document.getElementById(`scrum_${hour}_${team}`);
+                    const children = row.children;
+                    for(i=1; i<children.length; i++){
+                        if(children[i].innerHTML == "") {
+                            children[i].innerHTML = `${template}${member}(${userclass})</span>`;
+                            break;
+                        }
+                    }
+                })
+            }
+        });
+    }
+
+    function scrum_data() {
+        $.ajax({
+            type: "GET",
+            url: "/api/scrum/scrum_state",
+            dataType: "json",
+            success: function (data) {
+                const scrum = document.getElementById("scrum");
+                scrum.innerHTML = "";
+                data.forEach(d => {
+                    const hour = d[1];
+                    const team = d[2];
+                    if(team > 1) {
+                        scrum.innerHTML += `<tr onclick="scrum_submit(${hour}, ${team})" id="scrum_${hour}_${team}"><th scope="row">${hour}시(${team})</th><td></td><td></td><td></td><td></td>`;
+                    }
+                    else {
+                        scrum.innerHTML += `<tr onclick="scrum_submit(${hour}, ${team})" id="scrum_${hour}_${team}"><th scope="row">${hour}시</th><td></td><td></td><td></td><td></td>`;
+                    }
+                })
+
+                const today_elm = document.getElementById("today");
+                today_elm.innerText = data[0][0];
+                
+                scrum_data_member();
+            }
+        });
+    }
+
+    function select_user(elm) {
+        set_cookie(elm);
+        location.reload();
+    }
+
+    function check_class() {
+        const username = get_username();
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/check_class",
+            data: `username=${username}`,
+            dataType: "text",
+            success: function (data) {
+                userclass = data;
+            }
+        });
+    }
+
+    function create_message() {
+        const scrum = document.getElementById("scrum");
+        const scrum_datas = scrum.children;
+        var message = "⛄새벽크루⛄\n\n";
+        for(i=0; i<scrum_datas.length; i++){
+            const data = scrum_datas[i].children;
+            var flag = true;
+            for(j=0; j<data.length; j++){
+                if(data[j].innerHTML == "") {
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag) {
+                message += `${data[0].innerText} `
+                for(j=1; j<data.length; j++){
+                    const userclass = data[j].children[0].className;
+                    if(userclass == 1) message += "강주 ";
+                    else if(userclass == 2) message += "주 ";
+                    else if(userclass == 7) message += "일 ";
+                    else message += `${userclass - 2} `;
+                }
+                message += "\n";
+            }
+        }
+        message += "\n구합니다!";
+
+        const msg_elm = document.getElementById("message");
+        msg_elm.value = message;
+
+        msg_elm.select();
+        document.execCommand("copy");
+    }
+
+    scrum_data();
+    
+    // setInterval(() => {
+    //     scrum_data();
+    // }, 1000)
+
+</script>
+
+</html>

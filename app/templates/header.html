@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <title>크루 새벽</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <style>
+        @import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+
+        body {
+            font-family: 'Jeju Gothic', sans-serif;
+        }
+
+        .username_wrapper {
+            font-size: 1.5rem;
+            color: white;
+            text-align: center;
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-40%);
+        }
+
+        @media (min-width: 768px) {
+            .table {
+                font-size: 2rem;
+            }
+            .username_wrapper {
+                font-size: 3rem;
+            }
+        }
+        @media (min-width: 992px) {
+            .table {
+                font-size: 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .table {
+                font-size: 1.5rem;
+            }
+        }
+        @media (min-width: 1400px) {
+            .table {
+                font-size: 1.1rem;
+            }
+        }
+
+        td {
+            min-width: 10rem;
+        }
+        th {
+            min-width: 9rem;
+        }
+    </style>
+</head>
+
+<body style="background: linear-gradient(#5555ff, pink)">
+    <div class="container"
+        style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: space-around; width: 11vw; float: right" id="menu">
+        <button type="button" class="btn btn-danger mb-3" style="opacity: 0.8; width: 5rem"
+            onclick="location.href='/scrum'">친선</button>
+        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 5rem"
+            onclick="location.href='/'">쿠폰</button>
+    </div>
+
+    <div class="username_wrapper">
+        <span id="username_element" style="font-weight: bolder;"></span>
+        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 7rem; font-size: 1.5rem; margin-top: 0.5rem;"
+            onclick="delete_cookie()">나가기</button>
+    </div>
+
+    <div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">

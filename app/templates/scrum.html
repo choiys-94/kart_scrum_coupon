@@ -1,20 +1,21 @@
 {% include 'header.html' %}
-<div class="container" style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: center;">
-    <span style="display: inline-block; font-size: 2rem; color: white" id="today" onclick="create_message()"></span>
-</div>
-<table class="table table-light text-center">
-    <thead>
-        <tr class="table-warning">
-            <th scope="col">시간</th>
-            <th scope="col">1번</th>
-            <th scope="col">2번</th>
-            <th scope="col">3번</th>
-            <th scope="col">4번</th>
-        </tr>
-    </thead>
-    <tbody id="scrum">
-    </tbody>
-</table>
+<div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">
+    <div class="container" style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: center;">
+        <span style="display: inline-block; font-size: 2rem; color: white" id="today" onclick="create_message()"></span>
+    </div>
+    <table class="table table-light text-center">
+        <thead>
+            <tr class="table-warning">
+                <th scope="col">시간</th>
+                <th scope="col">1번</th>
+                <th scope="col">2번</th>
+                <th scope="col">3번</th>
+                <th scope="col">4번</th>
+            </tr>
+        </thead>
+        <tbody id="scrum">
+        </tbody>
+    </table>
 </div>
 </div>
 
@@ -95,21 +96,21 @@
             </div>
             <div class="modal-body" style="font-size: 2rem;">
                 {% for user in users %}
-                    <span onclick="select_user('{{ user[0] }}')">
+                <span onclick="select_user('{{ user[0] }}')">
                     {{ user[0] }}
                     (
-                        {% if user[1] == 7 %}
-                            일반
-                        {% elif user[1] == 2 %}
-                            주력
-                        {% elif user[1] == 1 %}
-                            강주력
-                        {% else %}
-                            {{ user[1] - 2 }}군
-                        {% endif %}
+                    {% if user[1] == 7 %}
+                    일반
+                    {% elif user[1] == 2 %}
+                    주력
+                    {% elif user[1] == 1 %}
+                    강주력
+                    {% else %}
+                    {{ user[1] - 2 }}군
+                    {% endif %}
                     )
-                    </span>
-                    <br />
+                </span>
+                <br />
                 {% endfor %}
             </div>
             <div class="modal-footer">
@@ -119,7 +120,9 @@
     </div>
 </div>
 
-<textarea id="message" style="height: 100%; opacity: 0.8; background: transparent; border: 0px; resize: none; color: white; font-size: 1.5rem; margin: 1rem 0 0 1rem;" disabled></textarea>
+<textarea id="message"
+    style="height: 100%; opacity: 0.8; background: transparent; border: 0px; resize: none; color: white; font-size: 1.5rem; margin: 1rem 0 0 1rem;"
+    disabled></textarea>
 
 </body>
 
@@ -150,7 +153,7 @@
 
     function create_account() {
         let username = document.getElementById("c_username").value;
-        if(userclass == ""){
+        if (userclass == "") {
             alert("군을 선택해주세요.");
             return;
         }
@@ -183,6 +186,9 @@
 
     function scrum_submit(hour, team) {
         let username = get_username();
+        if (username == "undefined") {
+            location.reload();
+        }
 
         $.ajax({
             type: "POST",
@@ -194,7 +200,7 @@
             }
         });
     }
-    
+
     function scrum_data_member() {
         $.ajax({
             type: "GET",
@@ -208,22 +214,22 @@
                     const member = d[2];
                     let userclass = d[3];
                     let template = `<span style="color:${class_color[userclass]};" class="${userclass}">`;
-                    if(userclass == 1){
+                    if (userclass == 1) {
                         userclass = "강";
                     }
-                    else if(userclass == 2){
+                    else if (userclass == 2) {
                         userclass = "주";
                     }
-                    else if(userclass < 7){
+                    else if (userclass < 7) {
                         userclass = `${userclass - 2}`
                     }
-                    else{
+                    else {
                         userclass = "일"
                     }
                     const row = document.getElementById(`scrum_${hour}_${team}`);
                     const children = row.children;
-                    for(i=1; i<children.length; i++){
-                        if(children[i].innerHTML == "") {
+                    for (i = 1; i < children.length; i++) {
+                        if (children[i].innerHTML == "") {
                             children[i].innerHTML = `${template}${member}(${userclass})</span>`;
                             break;
                         }
@@ -244,17 +250,21 @@
                 data.forEach(d => {
                     const hour = d[1];
                     const team = d[2];
-                    if(team > 1) {
-                        scrum.innerHTML += `<tr onclick="scrum_submit(${hour}, ${team})" id="scrum_${hour}_${team}"><th scope="row">${hour}시(${team})</th><td></td><td></td><td></td><td></td>`;
+                    const closed = d[3];
+                    var closed_template = ` class="table-danger"`
+                    if (closed == '0')
+                        closed_template = ""
+                    if (team > 1) {
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th scope="row" onclick="req_closed(this, ${hour}, ${team})">${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td>`;
                     }
                     else {
-                        scrum.innerHTML += `<tr onclick="scrum_submit(${hour}, ${team})" id="scrum_${hour}_${team}"><th scope="row">${hour}시</th><td></td><td></td><td></td><td></td>`;
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th scope="row" onclick="req_closed(this, ${hour}, ${team})">${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td>`;
                     }
                 })
 
                 const today_elm = document.getElementById("today");
                 today_elm.innerText = data[0][0];
-                
+
                 scrum_data_member();
             }
         });
@@ -282,26 +292,31 @@
         const scrum = document.getElementById("scrum");
         const scrum_datas = scrum.children;
         var message = "⛄새벽크루⛄\n\n";
-        for(i=0; i<scrum_datas.length; i++){
+        for (i = 0; i < scrum_datas.length; i++) {
             const data = scrum_datas[i].children;
             var flag = true;
-            for(j=0; j<data.length; j++){
-                if(data[j].innerHTML == "") {
+            for (j = 0; j < data.length; j++) {
+                if (data[j].innerHTML == "") {
                     flag = false;
                     break;
                 }
             }
-            if(flag) {
+            if (flag) {
                 message += `${data[0].innerText} `
-                for(j=1; j<data.length; j++){
+                for (j = 1; j < data.length; j++) {
                     const userclass = data[j].children[0].className;
-                    if(userclass == 1) message += "강주 ";
-                    else if(userclass == 2) message += "주 ";
-                    else if(userclass == 7) message += "일 ";
+                    if (userclass == 1) message += "강주 ";
+                    else if (userclass == 2) message += "주 ";
+                    else if (userclass == 7) message += "일 ";
                     else message += `${userclass - 2} `;
+                }
+                const closed = scrum_datas[i].className;
+                if (closed != "") {
+                    message += "(마감)";
                 }
                 message += "\n";
             }
+
         }
         message += "\n구합니다!";
 
@@ -312,8 +327,30 @@
         document.execCommand("copy");
     }
 
-    scrum_data();
-    
+    function req_closed(elm, hour, team) {
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/scrum_closed",
+            data: `hour=${hour}&team=${team}`,
+            dataType: "text",
+            success: function (data) {
+                scrum_data()
+            }
+        });
+    }
+
+    $(document).ready(() => {
+        const username = get_username();
+        var loginout = document.getElementById("loginout");
+        if (username == "undefined") {
+            loginout.innerText = "들어가기";
+        }
+        else {
+            loginout.innerText = "나가기";
+        }
+        scrum_data();
+    });
+
     // setInterval(() => {
     //     scrum_data();
     // }, 1000)

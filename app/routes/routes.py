@@ -29,3 +29,13 @@ def scrum():
         users = cur.fetchall()
         
     return render_template("scrum.html", users=users)
+
+@main.route("/users", methods=["GET"])
+def users():
+    users = []
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT username, class FROM crew_users")
+        users = cur.fetchall()
+        
+    return render_template("users.html", users=users)

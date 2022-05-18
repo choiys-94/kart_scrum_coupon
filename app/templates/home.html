@@ -1,54 +1,55 @@
 {% include 'header.html' %}
-<div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem;">
-    <h2>쿠폰 사용</h2><br />
-    <div class="mb-3">
-        <label for="username" class="form-label">
-            <h4>계정</h4>
-        </label>
-        <input class="form-control" list="datalistOptions" id="username" name="username" placeholder="계정 입력 / 선택"
-            oninput="check_id()">
-        <datalist id="datalistOptions">
-            {% for user in users %}
-            <option value="{{ user[0] }}"></option>
-            {% endfor %}
-        </datalist>
+<div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">
+    <div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem;">
+        <h2>쿠폰 사용</h2><br />
+        <div class="mb-3">
+            <label for="username" class="form-label">
+                <h4>계정</h4>
+            </label>
+            <input class="form-control" list="datalistOptions" id="username" name="username" placeholder="계정 입력 / 선택"
+                oninput="check_id()">
+            <datalist id="datalistOptions">
+                {% for user in users %}
+                <option value="{{ user[0] }}"></option>
+                {% endfor %}
+            </datalist>
+        </div>
+        <div class="mb-3">
+            <label for="userid" class="form-label">
+                <h4>계정번호</h4>
+            </label>
+            <input type="text" class="form-control" id="userid" name="userid" placeholder="자동 입력" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="coupon" class="form-label">
+                <h4>쿠폰코드</h4>
+            </label>
+            <input type="text" class="form-control" id="coupon" name="coupon" placeholder="쿠폰코드 입력">
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary mb-3" onclick="check_coupon()">확인</button>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="userid" class="form-label">
-            <h4>계정번호</h4>
-        </label>
-        <input type="text" class="form-control" id="userid" name="userid" placeholder="자동 입력" disabled>
-    </div>
-    <div class="mb-3">
-        <label for="coupon" class="form-label">
-            <h4>쿠폰코드</h4>
-        </label>
-        <input type="text" class="form-control" id="coupon" name="coupon" placeholder="쿠폰코드 입력">
-    </div>
-    <div class="mb-3">
-        <button type="button" class="btn btn-primary mb-3" onclick="check_coupon()">확인</button>
-    </div>
-</div>
 
-<div style="margin-top: 3rem;"></div>
-<div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem">
-    <h2>계정 추가</h2><br />
-    <div class="mb-3">
-        <label for="c_username" class="form-label">
-            <h4>계정명</h4>
-        </label>
-        <input type="text" class="form-control" id="c_username" name="username" placeholder="ex. 선이">
+    <div style="margin-top: 3rem;"></div>
+    <div class="container" style="padding: 1rem 1rem 0 1rem; background: #eeeeee; border-radius: 1rem">
+        <h2>계정 추가</h2><br />
+        <div class="mb-3">
+            <label for="c_username" class="form-label">
+                <h4>계정명</h4>
+            </label>
+            <input type="text" class="form-control" id="c_username" name="username" placeholder="ex. 선이">
+        </div>
+        <div class="mb-3">
+            <label for="c_userid" class="form-label">
+                <h4>계정번호</h4>
+            </label>
+            <input type="text" class="form-control" id="c_userid" name="userid" placeholder="ex. 07901CQ10406Q">
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary mb-3" onclick="create_account()">확인</button>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="c_userid" class="form-label">
-            <h4>계정번호</h4>
-        </label>
-        <input type="text" class="form-control" id="c_userid" name="userid" placeholder="ex. 07901CQ10406Q">
-    </div>
-    <div class="mb-3">
-        <button type="button" class="btn btn-primary mb-3" onclick="create_account()">확인</button>
-    </div>
-</div>
 </div>
 <script>
     function create_account() {

@@ -27,26 +27,26 @@ def get_today():
 @scrum_api.route("/scrum_state", methods=["GET"])
 def scrum_state():
     today = get_today()
-
     with db_conn() as conn:
         cur = conn.cursor()
 
-        cur.execute("SELECT date, time, team FROM scrum order by time asc, team asc")
+        cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ? order by time asc, team asc", (today, ))
         res = cur.fetchall()
         if len(res) < 13:
             for i in range(16, 29):
-                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team) VALUES(?,?,?)", (today, i, 1))
+                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed) VALUES(?,?,?,?)", (today, i, 1, 0))
 
-            cur.execute("SELECT date, time, team FROM scrum")
+            cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ?", (today, ))
             res = cur.fetchall()
 
         return json.dumps(res)
 
 @scrum_api.route("/scrum_data", methods=["GET"])
 def scrum_data():
+    today = get_today()
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("SELECT time, team, member, class FROM (scrum a INNER JOIN scrum_member b ON (a.idx=scrum_idx)) c INNER JOIN crew_users d ON (c.member=d.username) ORDER BY class asc")
+        cur.execute("SELECT time, team, member, class FROM (scrum a INNER JOIN scrum_member b ON (a.idx=scrum_idx)) c INNER JOIN crew_users d ON (c.member=d.username) WHERE date = ? ORDER BY class asc", (today, ))
         res = cur.fetchall()
 
         return json.dumps(res)
@@ -77,13 +77,13 @@ def scrum_submit():
 
         cur.execute("SELECT member FROM scrum_member WHERE (scrum_idx = ?)", (scrum_idx, ))
         scrum_count = cur.fetchall()
-        print(scrum_count)
+        
         if len(scrum_count) >= 4:
             team += 1
             cur.execute("SELECT 1 FROM scrum WHERE date = ? AND time = ? AND team = ?", (today, hour, team))
             res = cur.fetchall()
             if len(res) == 0:
-                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team) VALUES(?,?,?)", (today, hour, team))
+                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed) VALUES(?,?,?,?)", (today, hour, team, 0))
             return "1"
 
         cur.execute("INSERT OR IGNORE INTO scrum_member(scrum_idx, member) VALUES(?,?)", (scrum_idx, username))
@@ -107,7 +107,7 @@ def all_users():
         cur = conn.cursor()
         cur.execute("SELECT username, class FROM crew_users")
         users = cur.fetchall()
-        print(users)
+        
         if len(users) > 0:
             return users
 
@@ -122,6 +122,17 @@ def check_class():
         res = cur.fetchall()
         if len(res) > 0:
             return str(res[0][0])
+
+@scrum_api.route("/scrum_closed", methods=["POST"])
+def scrum_closed():
+    hour = request.form["hour"]
+    team = request.form["team"]
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE scrum SET closed=ABS(closed-1) WHERE time = ? AND team = ?", (hour, team))
+        cur.execute("SELECT closed FROM scrum WHERE time = ? AND team = ?", (hour, team))
+        res = cur.fetchall()
+        return str(res[0][0])
 
 @scrum_api.route("/d", methods=["GET"])
 def test_d():

@@ -56,6 +56,14 @@
         th {
             min-width: 9rem;
         }
+
+        .users_wrapper {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -68,10 +76,10 @@
             onclick="location.href='/'">쿠폰</button>
     </div>
 
-    <div class="username_wrapper">
+    <div class="username_wrapper" id="username_wrapper">
         <span id="username_element" style="font-weight: bolder;"></span>
-        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 7rem; font-size: 1.5rem; margin-top: 0.5rem;"
+        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 8rem; font-size: 1.5rem; margin-top: 0.5rem;" id="loginout"
             onclick="delete_cookie()">나가기</button>
     </div>
 
-    <div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">
+    

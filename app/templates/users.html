@@ -1,0 +1,85 @@
+{% include 'header.html' %}
+
+<div class="container" style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; position: absolute; top: 10rem; left: 50%; transform: translateX(-50%);">
+    <h4>계정 관리</h4>
+    <div class="users_wrapper">
+        {% for user in users%}
+        <div class="users_item">
+            <div class="col-auto">
+                <input type="text" value="{{user[0]}}"/>
+                <input type="text" value="{{user[1]}}"/><br/>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+
+<script>
+    if (!document.cookie) {
+        const modal_trigger = document.getElementById("modal_trigger");
+        modal_trigger.click();
+    }
+    else {
+        const username_element = document.getElementById("username_element");
+        username_element.innerText = get_username();
+    }
+
+    const class_color = {
+        "1": "red",
+        "2": "orange",
+        "3": "blue",
+        "4": "green",
+        "5": "skyblue",
+        "6": "black",
+        "7": "grey"
+    }
+
+    var userclass = "";
+    function select_class(c_userclass) {
+        userclass = c_userclass;
+    }
+
+    function set_cookie(username) {
+        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;"
+    }
+
+    function delete_cookie() {
+        document.cookie = "username=; expires=Thu, 01 Jan 1999 00:00:10 GMT;";
+        location.reload();
+    }
+
+    function get_username() {
+        return decodeURIComponent(document.cookie.split("name=")[1]);
+    }
+
+    function select_user(elm) {
+        set_cookie(elm);
+        location.reload();
+    }
+
+    function check_class() {
+        const username = get_username();
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/check_class",
+            data: `username=${username}`,
+            dataType: "text",
+            success: function (data) {
+                userclass = data;
+            }
+        });
+    }
+
+    $(document).ready(() => {
+        document.getElementById("username_wrapper").style="display:none;";
+    });
+
+    // setInterval(() => {
+    //     scrum_data();
+    // }, 1000)
+
+</script>
+
+</html>

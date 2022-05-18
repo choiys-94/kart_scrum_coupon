@@ -4,6 +4,7 @@
     <title>크루 새벽</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
         crossorigin="anonymous"></script>
@@ -16,6 +17,30 @@
             font-family: 'Jeju Gothic', sans-serif;
         }
 
+        td {
+            min-width: 10rem;
+        }
+
+        th {
+            min-width: 9rem;
+        }
+
+        #menu {
+            width: 18rem;
+            padding: 1rem 1rem 0 1rem;
+            position: absolute;
+            display: flex;
+            justify-content: space-around;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        #menu button {
+            font-size: 2rem;
+            width: 7rem;
+            opacity: 0.8;
+        }
+
         .username_wrapper {
             font-size: 1.5rem;
             color: white;
@@ -26,60 +51,138 @@
             transform: translateX(-40%);
         }
 
+        .username_wrapper button {
+            opacity: 0.8;
+            width: 8rem;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .users_wrapper {
+            font-size: 1rem;
+        }
+
+        .user_mng {
+            float: right;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        #users_button {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            color: #ffffff;
+        }
+
+        #message {
+            height: 20%;
+            opacity: 0.8;
+            background: transparent;
+            border: 0px;
+            resize: none;
+            color: white;
+            font-size: 1.5rem;
+            margin: 1rem 0 0 1rem;
+            cursor: default;
+        }
+
         @media (min-width: 768px) {
             .table {
                 font-size: 2rem;
             }
+
+            #menu {
+                width: 10rem;
+            }
+
+            #menu button {
+                margin-left: 1rem;
+            }
+
             .username_wrapper {
                 font-size: 3rem;
             }
+
+            .users_wrapper {
+                font-size: 2rem;
+            }
+
+            #users_button {
+                font-size: 2rem;
+            }
         }
+
         @media (min-width: 992px) {
             .table {
-                font-size: 1.5rem;
+                font-size: 2rem;
+            }
+
+            #menu {
+                width: 10rem;
+            }
+
+            #menu button {
+                margin-left: 1rem;
+            }
+
+            .username_wrapper {
+                font-size: 3rem;
+            }
+
+            .users_wrapper {
+                font-size: 2rem;
             }
         }
+
         @media (min-width: 1200px) {
             .table {
-                font-size: 1.5rem;
+                font-size: 1.1rem;
+            }
+
+            #menu {
+                width: 18rem;
+            }
+
+            #menu button {
+                margin: auto;
+            }
+
+            .users_wrapper {
+                font-size: 1.2rem;
+            }
+
+            .w-50 {
+                width: 25% !important;
             }
         }
+
         @media (min-width: 1400px) {
             .table {
                 font-size: 1.1rem;
             }
-        }
 
-        td {
-            min-width: 10rem;
-        }
-        th {
-            min-width: 9rem;
-        }
+            #menu {
+                width: 18rem;
+            }
 
-        .users_wrapper {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            width: 100%;
+            #menu button {
+                margin: auto;
+            }
+
+            .users_wrapper {
+                font-size: 1.2rem;
+            }
+
+            .w-50 {
+                width: 25% !important;
+            }
         }
     </style>
 </head>
 
 <body style="background: linear-gradient(#5555ff, pink)">
-    <div class="container"
-        style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: space-around; width: 11vw; float: right" id="menu">
-        <button type="button" class="btn btn-danger mb-3" style="opacity: 0.8; width: 5rem"
-            onclick="location.href='/scrum'">친선</button>
-        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 5rem"
-            onclick="location.href='/'">쿠폰</button>
+    <div class="" id="menu">
+        <button type="button" class="btn btn-danger" onclick="location.href='/scrum'">친선</button>
+        <button type="button" class="btn btn-warning" onclick="location.href='/'">쿠폰</button>
     </div>
-
-    <div class="username_wrapper" id="username_wrapper">
-        <span id="username_element" style="font-weight: bolder;"></span>
-        <button type="button" class="btn btn-warning mb-3" style="opacity: 0.8; width: 8rem; font-size: 1.5rem; margin-top: 0.5rem;" id="loginout"
-            onclick="delete_cookie()">나가기</button>
-    </div>
-
-    

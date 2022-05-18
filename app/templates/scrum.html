@@ -1,4 +1,8 @@
 {% include 'header.html' %}
+<div class="username_wrapper" id="username_wrapper">
+    <span id="username_element" style="font-weight: bolder;"></span>
+    <button type="button" class="btn btn-warning mb-3" id="loginout" onclick="delete_cookie()">나가기</button>
+</div>
 <div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">
     <div class="container" style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: center;">
         <span style="display: inline-block; font-size: 2rem; color: white" id="today" onclick="create_message()"></span>
@@ -121,21 +125,13 @@
 </div>
 
 <textarea id="message"
-    style="height: 100%; opacity: 0.8; background: transparent; border: 0px; resize: none; color: white; font-size: 1.5rem; margin: 1rem 0 0 1rem;"
     disabled></textarea>
 
 </body>
 
-<script>
-    if (!document.cookie) {
-        const modal_trigger = document.getElementById("modal_trigger");
-        modal_trigger.click();
-    }
-    else {
-        const username_element = document.getElementById("username_element");
-        username_element.innerText = get_username();
-    }
+<button id="users_button" class="btn btn-info" onclick="location.href='/users'">회원관리</button>
 
+<script>
     const class_color = {
         "1": "red",
         "2": "orange",
@@ -153,6 +149,10 @@
 
     function create_account() {
         let username = document.getElementById("c_username").value;
+        if (username == "") {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
         if (userclass == "") {
             alert("군을 선택해주세요.");
             return;
@@ -167,6 +167,9 @@
                 set_cookie(username);
                 document.body.style.zomm = 1;
                 location.reload();
+            },
+            error: function (data) {
+                alert("중복된 닉네임이 존재합니다.");
             }
         });
     }
@@ -181,14 +184,35 @@
     }
 
     function get_username() {
-        return decodeURIComponent(document.cookie.split("name=")[1]);
+        var username = document.cookie.split("name=")[1];
+        if (username != undefined) {
+            username = username.split(";")[0];
+        }
+        return decodeURIComponent(username);
+    }
+
+    function check_class() {
+        const username = get_username();
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/check_class",
+            data: `username=${username}`,
+            dataType: "text",
+            success: function (data) {
+                if (data == "0") {
+                    alert("닉네임이 존재하지 않거나 변경되었습니다!");
+                    delete_cookie();
+                }
+            }
+        });
     }
 
     function scrum_submit(hour, team) {
         let username = get_username();
-        if (username == "undefined") {
-            location.reload();
-        }
+        if (username == "undefined")
+            location.reload;
+
+        check_class();
 
         $.ajax({
             type: "POST",
@@ -251,16 +275,16 @@
                     const hour = d[1];
                     const team = d[2];
                     const closed = d[3];
-                    var closed_template = ` class="table-danger"`
+                    var closed_template = ` class="table-danger"`;
                     if (closed == '0')
-                        closed_template = ""
+                        closed_template = "";
                     if (team > 1) {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th scope="row" onclick="req_closed(this, ${hour}, ${team})">${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td>`;
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th onclick="req_closed(${hour}, ${team})">${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
                     }
                     else {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th scope="row" onclick="req_closed(this, ${hour}, ${team})">${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td>`;
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th onclick="req_closed(${hour}, ${team})">${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
                     }
-                })
+                });
 
                 const today_elm = document.getElementById("today");
                 today_elm.innerText = data[0][0];
@@ -273,19 +297,6 @@
     function select_user(elm) {
         set_cookie(elm);
         location.reload();
-    }
-
-    function check_class() {
-        const username = get_username();
-        $.ajax({
-            type: "POST",
-            url: "/api/scrum/check_class",
-            data: `username=${username}`,
-            dataType: "text",
-            success: function (data) {
-                userclass = data;
-            }
-        });
     }
 
     function create_message() {
@@ -327,7 +338,7 @@
         document.execCommand("copy");
     }
 
-    function req_closed(elm, hour, team) {
+    function req_closed(hour, team) {
         $.ajax({
             type: "POST",
             url: "/api/scrum/scrum_closed",
@@ -339,13 +350,24 @@
         });
     }
 
+    // window.oncontextmenu = function(event) {
+    //     alert(1);
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //     return false;
+    // }
+
     $(document).ready(() => {
         const username = get_username();
         var loginout = document.getElementById("loginout");
         if (username == "undefined") {
+            const modal_trigger = document.getElementById("modal_trigger");
             loginout.innerText = "들어가기";
+            modal_trigger.click();
         }
         else {
+            const username_element = document.getElementById("username_element");
+            username_element.innerText = get_username();
             loginout.innerText = "나가기";
         }
         scrum_data();

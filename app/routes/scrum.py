@@ -10,6 +10,9 @@ requests.packages.urllib3.disable_warnings()
 
 db_conn = lambda: sql.connect("database.db")
 
+START_TIME = 20
+END_TIME = 26
+
 # conn.execute("CREATE TABLE IF NOT EXISTS crew_users (idx integer primary key, username text, class text)")
 # conn.execute("CREATE TABLE IF NOT EXISTS scrum (idx integer primary key, date text, time text, team text)")
 # conn.execute("CREATE TABLE IF NOT EXISTS scrum_member (idx integer primary key, scrum_idx integer, member text)")
@@ -32,8 +35,8 @@ def scrum_state():
 
         cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ? order by time asc, team asc", (today, ))
         res = cur.fetchall()
-        if len(res) < 13:
-            for i in range(16, 29):
+        if len(res) < (END_TIME - START_TIME + 1):
+            for i in range(START_TIME, END_TIME + 1):
                 cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed) VALUES(?,?,?,?)", (today, i, 1, 0))
 
             cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ?", (today, ))
@@ -101,6 +104,27 @@ def create_user():
 
         return "크루원 등록이 완료되었습니다."
 
+@scrum_api.route("/edit_user", methods=["POST"])
+def edit_user():
+    org_username = request.form["org_username"]
+    username = request.form["username"]
+    userclass = request.form["class"]
+
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE crew_users SET username = ?, class = ? WHERE username = ?", (username, int(userclass), org_username))
+
+        return "크루원 수정이 완료되었습니다."
+
+@scrum_api.route("/delete_user", methods=["POST"])
+def delete_user():
+    username = request.form["username"]
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM crew_users WHERE username = ?", (username, ))
+
+        return "크루원 삭제가 완료되었습니다."
+
 @scrum_api.route("/all_users", methods=["GET"])
 def all_users():
     with db_conn() as conn:
@@ -118,10 +142,12 @@ def check_class():
     username = request.form["username"]
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("SELECT class FROM crew_users WHERE username = ?", (username, ))
+        cur.execute("SELECT 1 FROM crew_users WHERE username = ?", (username, ))
         res = cur.fetchall()
         if len(res) > 0:
-            return str(res[0][0])
+            return "1"
+    
+    return "0"
 
 @scrum_api.route("/scrum_closed", methods=["POST"])
 def scrum_closed():

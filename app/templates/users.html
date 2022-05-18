@@ -1,79 +1,227 @@
 {% include 'header.html' %}
 
-<div class="container" style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; position: absolute; top: 10rem; left: 50%; transform: translateX(-50%);">
+<div class="container w-75"
+    style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; margin-top: 10rem;">
+    <h4>계정 추가</h4>
+    <div style="padding: 1rem 1rem 1rem 1rem; background: #ffffff; border-radius: 1rem;">
+        <div class="mb-3">
+            <label for="c_username" class="form-label">
+                <h5>닉네임</h5>
+            </label>
+            <input type="text" class="form-control" id="c_username" name="c_username" placeholder="ex. 선이">
+        </div>
+        <div class="mb-3">
+            <label for="c_class" class="form-label">
+                <h5>군</h5>
+            </label>
+            <br />
+
+            <input type="radio" class="btn-check" name="c_class" id="powermain-outlined" autocomplete="off"
+                onclick="select_class(1)">
+            <label class="btn btn-outline-danger" for="powermain-outlined">강주</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="main-outlined" autocomplete="off"
+                onclick="select_class(2)">
+            <label class="btn btn-outline-warning" for="main-outlined">주</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="first-outlined" autocomplete="off"
+                onclick="select_class(3)">
+            <label class="btn btn-outline-primary" for="first-outlined">1</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="second-outlined" autocomplete="off"
+                onclick="select_class(4)">
+            <label class="btn btn-outline-success" for="second-outlined">2</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="third-outlined" autocomplete="off"
+                onclick="select_class(5)">
+            <label class="btn btn-outline-info" for="third-outlined">3</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="forth-outlined" autocomplete="off"
+                onclick="select_class(6)">
+            <label class="btn btn-outline-dark" for="forth-outlined">4</label>
+
+            <input type="radio" class="btn-check" name="c_class" id="normal-outlined" autocomplete="off"
+                onclick="select_class(7)">
+            <label class="btn btn-outline-secondary" for="normal-outlined">일</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-1" onclick="create_account()">확인</button>
+    </div>
+</div>
+
+
+<div class="container w-75"
+    style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; margin-top: 1rem; margin-bottom: 10rem;">
     <h4>계정 관리</h4>
     <div class="users_wrapper">
-        {% for user in users%}
-        <div class="users_item">
-            <div class="col-auto">
-                <input type="text" value="{{user[0]}}"/>
-                <input type="text" value="{{user[1]}}"/><br/>
+        <ul class="list-group w-100">
+            {% for user in users%}
+            <li class="list-group-item">{{ user[0] }} (
+                {% if user[1] == 7 %}
+                일반
+                {% elif user[1] == 2 %}
+                주력
+                {% elif user[1] == 1 %}
+                강주력
+                {% else %}
+                {{ user[1] - 2 }}군
+                {% endif %}
+                )
+                <span class="user_mng" onclick="delete_confirm('{{ user[0] }}')"><i class="fas fa-trash-alt"></i></span>
+                <span class="user_mng" onclick="edit_modal('{{ user[0] }}', {{user[1]}})"><i
+                        class="fas fa-pencil-alt"></i></span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Hidden Modal Button -->
+<input type="hidden" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"
+    id="modal_trigger"></input>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">정보 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container" style="padding: 1rem 1rem 0.5rem 1rem;">
+                    <input type="hidden" id="form_org_username" />
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="form_username">
+                        <label for="form_username">닉네임</label>
+                    </div>
+                    <div class="form-floating">
+                        <select class="form-select" id="form_userclass">
+                            <option value="1">강주력</option>
+                            <option value="2">주력</option>
+                            <option value="3">1군</option>
+                            <option value="4">2군</option>
+                            <option value="5">3군</option>
+                            <option value="6">4군</option>
+                            <option value="7">일반</option>
+                        </select>
+                        <label for="form_userclass">군</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="edit_user()">수정</button>
+                </div>
             </div>
         </div>
-        {% endfor %}
     </div>
 </div>
 
 </body>
 
 <script>
-    if (!document.cookie) {
-        const modal_trigger = document.getElementById("modal_trigger");
-        modal_trigger.click();
-    }
-    else {
-        const username_element = document.getElementById("username_element");
-        username_element.innerText = get_username();
-    }
-
-    const class_color = {
-        "1": "red",
-        "2": "orange",
-        "3": "blue",
-        "4": "green",
-        "5": "skyblue",
-        "6": "black",
-        "7": "grey"
-    }
-
     var userclass = "";
     function select_class(c_userclass) {
         userclass = c_userclass;
     }
 
-    function set_cookie(username) {
-        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;"
-    }
+    function create_account() {
+        let username = document.getElementById("c_username").value;
+        if (username == "") {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+        if (userclass == "") {
+            alert("군을 선택해주세요.");
+            return;
+        }
 
-    function delete_cookie() {
-        document.cookie = "username=; expires=Thu, 01 Jan 1999 00:00:10 GMT;";
-        location.reload();
-    }
-
-    function get_username() {
-        return decodeURIComponent(document.cookie.split("name=")[1]);
-    }
-
-    function select_user(elm) {
-        set_cookie(elm);
-        location.reload();
-    }
-
-    function check_class() {
-        const username = get_username();
         $.ajax({
             type: "POST",
-            url: "/api/scrum/check_class",
-            data: `username=${username}`,
+            url: "/api/scrum/create_user",
+            data: "username=" + username + "&class=" + userclass,
             dataType: "text",
             success: function (data) {
-                userclass = data;
+                document.body.style.zomm = 1;
+                location.reload();
+            },
+            error: function (data) {
+                alert("중복된 닉네임이 존재합니다.");
             }
         });
     }
 
+    function edit_user() {
+        const username = document.getElementById("form_username").value;
+        const org_username = document.getElementById("form_org_username").value;
+        const userclass_elm = document.getElementById("form_userclass");
+        const userclass = userclass_elm.options[userclass_elm.selectedIndex].value;
+
+        console.log(username);
+        console.log(org_username);
+        console.log(userclass);
+
+
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/edit_user",
+            data: "username=" + username + "&class=" + userclass + "&org_username=" + org_username,
+            dataType: "text",
+            success: function (data) {
+                document.body.style.zomm = 1;
+                location.reload();
+            },
+            error: function (data) {
+                alert("중복된 닉네임이 존재합니다.");
+            }
+        });
+    }
+
+    function delete_confirm(username) {
+        if (confirm(`${username}님을 삭제하시겠습니까?`)) {
+            $.ajax({
+                type: "POST",
+                url: "/api/scrum/delete_user",
+                data: "username=" + username,
+                dataType: "text",
+                success: function (data) {
+                    document.body.style.zomm = 1;
+                    location.reload();
+                }
+            });
+        }
+    }
+
+    function edit_modal(username, userclass) {
+        const modal_trigger = document.getElementById("modal_trigger");
+        modal_trigger.click();
+
+        const username_elm = document.getElementById("form_username");
+        username_elm.value = username;
+
+        const org_username_elm = document.getElementById("form_org_username");
+        org_username_elm.value = username;
+
+        const userclass_elm = document.getElementById("form_userclass");
+        const classes = userclass_elm.children;
+        for (i = 0; i < classes.length; i++) {
+            if (classes[i].value == userclass) {
+                classes[i].setAttribute("selected", 1);
+                break;
+            }
+        }
+    }
+
+    $("#myModal").on("hidden.bs.modal", () => {
+        const userclass_elm = document.getElementById("form_userclass");
+        const classes = userclass_elm.children;
+        for (i = 0; i < classes.length; i++) {
+            classes[i].removeAttribute("selected");
+        }
+    });
+
     $(document).ready(() => {
-        document.getElementById("username_wrapper").style="display:none;";
+        document.getElementById("username_wrapper").style = "display:none;";
     });
 
     // setInterval(() => {

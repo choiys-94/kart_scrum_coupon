@@ -36,7 +36,7 @@
         <h2>계정 추가</h2><br />
         <div class="mb-3">
             <label for="c_username" class="form-label">
-                <h4>계정명</h4>
+                <h4>닉네임</h4>
             </label>
             <input type="text" class="form-control" id="c_username" name="username" placeholder="ex. 선이">
         </div>
@@ -56,6 +56,15 @@
         let username = document.getElementById("c_username").value;
         let userid = document.getElementById("c_userid").value;
         let password = prompt("비밀번호를 입력해주세요.");
+
+        if(username == ""){
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+        if(userid == ""){
+            alert("계정번호를 입력해주세요.");
+            return;
+        }
 
         if (password) {
             $.ajax({

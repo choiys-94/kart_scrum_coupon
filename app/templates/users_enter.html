@@ -1,0 +1,28 @@
+{% include 'header.html' %}
+
+<div class="container w-75"
+    style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; margin-top: 10rem;">
+    <h4>비밀번호 입력</h4>
+    <div style="padding: 1rem 1rem 1rem 1rem; background: #ffffff; border-radius: 1rem;">
+        <form method="POST">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="password" name="password" placeholder="name@example.com">
+                <label for="password">비밀번호</label>
+            </div>
+            <button type="submit" class="btn btn-primary mb-1">확인</button>
+        </form>
+    </div>
+</div>
+{% if err %}
+<script>
+    alert('{{ err }}');
+</script>
+{% endif %}
+
+<script>
+    $(document).ready(() => {
+        document.getElementById("username_wrapper").style = "display:none;";
+    });
+</script>
+
+</html>

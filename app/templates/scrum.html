@@ -209,20 +209,22 @@
 
     function scrum_submit(hour, team) {
         let username = get_username();
-        if (username == "undefined")
+        if (username == "undefined" || username == undefined)
             location.reload;
 
         check_class();
 
-        $.ajax({
-            type: "POST",
-            url: "/api/scrum/scrum_submit",
-            data: `username=${username}&hour=${hour}&team=${team}`,
-            dataType: "text",
-            success: function (data) {
-                scrum_data();
-            }
-        });
+        if(confirm("투표 하시나요?")) {
+            $.ajax({
+                type: "POST",
+                url: "/api/scrum/scrum_submit",
+                data: `username=${username}&hour=${hour}&team=${team}`,
+                dataType: "text",
+                success: function (data) {
+                    scrum_data();
+                }
+            });
+        }
     }
 
     function scrum_data_member() {

@@ -59,8 +59,8 @@ def scrum_submit():
     hour = request.form["hour"]
     team = int(request.form["team"])
     username = request.form["username"]
-
-    if username == "":
+    
+    if username == "" or username == "undefined":
         return "1"
 
     today = get_today()

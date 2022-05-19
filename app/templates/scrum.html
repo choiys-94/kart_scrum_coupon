@@ -124,8 +124,7 @@
     </div>
 </div>
 
-<textarea id="message"
-    disabled></textarea>
+<textarea id="message" disabled></textarea>
 
 </body>
 
@@ -175,7 +174,7 @@
     }
 
     function set_cookie(username) {
-        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;"
+        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;admin=";
     }
 
     function delete_cookie() {
@@ -214,7 +213,7 @@
 
         check_class();
 
-        if(confirm("투표 하시나요?")) {
+        if (confirm("투표 하시나요?")) {
             $.ajax({
                 type: "POST",
                 url: "/api/scrum/scrum_submit",
@@ -265,7 +264,7 @@
         });
     }
 
-    function scrum_data() {
+    function scrum_init(admin) {
         $.ajax({
             type: "GET",
             url: "/api/scrum/scrum_state",
@@ -277,14 +276,19 @@
                     const hour = d[1];
                     const team = d[2];
                     const closed = d[3];
+                    const admin_template = {
+                        "0": "",
+                        "1": ` onclick="req_closed(${hour}, ${team})"`,
+                    }
+
                     var closed_template = ` class="table-danger"`;
                     if (closed == '0')
                         closed_template = "";
                     if (team > 1) {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th onclick="req_closed(${hour}, ${team})">${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th${admin_template[admin]}>${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
                     }
                     else {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th onclick="req_closed(${hour}, ${team})">${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th${admin_template[admin]}>${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
                     }
                 });
 
@@ -294,6 +298,21 @@
                 scrum_data_member();
             }
         });
+    }
+
+    function scrum_data() {
+        const username = get_username();
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/is_admin",
+            data: "username=" + username,
+            dataType: "text",
+            success: function (data) {
+                const admin = data;
+                scrum_init(admin);
+            }
+        });
+
     }
 
     function select_user(elm) {

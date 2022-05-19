@@ -6,6 +6,15 @@ import datetime
 
 db_conn = lambda: sql.connect("database.db")
 
+def get_users():
+    users = []
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT username, class, admin FROM crew_users")
+        users = cur.fetchall()
+
+    return users
+
 @main.route("/favicon.ico", methods=["GET"])
 def favicon():
     return send_from_directory("static/images", "favicon.ico", mimetype="image/vnd.microsoft.icon")
@@ -23,22 +32,9 @@ def home():
 
 @main.route("/scrum", methods=["GET"])
 def scrum():
-    users = []
-    with db_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT username, class FROM crew_users")
-        users = cur.fetchall()
+    users = get_users()
         
     return render_template("scrum.html", users=users)
-
-def get_users():
-    users = []
-    with db_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT username, class FROM crew_users")
-        users = cur.fetchall()
-
-    return users
 
 @main.route("/users", methods=["GET", "POST"])
 def users():

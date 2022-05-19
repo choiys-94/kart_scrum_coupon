@@ -67,7 +67,7 @@
                 {% endif %}
                 )
                 <span class="user_mng" onclick="delete_confirm('{{ user[0] }}')"><i class="fas fa-trash-alt"></i></span>
-                <span class="user_mng" onclick="edit_modal('{{ user[0] }}', {{user[1]}})"><i
+                <span class="user_mng" onclick="edit_modal('{{ user[0] }}', {{user[1]}}, {{user[2]}})"><i
                         class="fas fa-pencil-alt"></i></span>
             </li>
             {% endfor %}
@@ -107,6 +107,10 @@
                         </select>
                         <label for="form_userclass">군</label>
                     </div>
+                </div>
+                <div class="form-check form-switch form-check-reverse" style="margin-right: 1rem; margin-bottom: 0.5rem;">
+                    <label class="form-check-label" for="is_admin">운영진</label>
+                    <input class="form-check-input" type="checkbox" role="switch" id="is_admin">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
@@ -156,6 +160,11 @@
         const org_username = document.getElementById("form_org_username").value;
         const userclass_elm = document.getElementById("form_userclass");
         const userclass = userclass_elm.options[userclass_elm.selectedIndex].value;
+        const is_admin = $("#is_admin").is(":checked");
+        var admin = 0;
+        if(is_admin) {
+            admin = 1;
+        }
 
         console.log(username);
         console.log(org_username);
@@ -165,7 +174,7 @@
         $.ajax({
             type: "POST",
             url: "/api/scrum/edit_user",
-            data: "username=" + username + "&class=" + userclass + "&org_username=" + org_username,
+            data: "username=" + username + "&class=" + userclass + "&org_username=" + org_username + "&admin=" + admin,
             dataType: "text",
             success: function (data) {
                 document.body.style.zomm = 1;
@@ -192,7 +201,7 @@
         }
     }
 
-    function edit_modal(username, userclass) {
+    function edit_modal(username, userclass, admin) {
         const modal_trigger = document.getElementById("modal_trigger");
         modal_trigger.click();
 
@@ -209,6 +218,13 @@
                 classes[i].setAttribute("selected", 1);
                 break;
             }
+        }
+        
+        if(admin) {
+            $("#is_admin").prop("checked", 1);
+        }
+        else {
+            $("#is_admin").prop("checked", 0);
         }
     }
 

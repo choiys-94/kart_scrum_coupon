@@ -59,8 +59,11 @@ def scrum_submit():
     hour = request.form["hour"]
     team = int(request.form["team"])
     username = request.form["username"]
-    
-    if username == "" or username == "undefined":
+
+    if username == "undefined":
+        return "1"
+
+    if username == "":
         return "1"
 
     today = get_today()
@@ -100,7 +103,7 @@ def create_user():
 
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("INSERT INTO crew_users(username, class) VALUES(?,?)", (username, userclass))
+        cur.execute("INSERT INTO crew_users(username, class, admin) VALUES(?,?,?)", (username, userclass, 0))
 
         return "크루원 등록이 완료되었습니다."
 
@@ -109,10 +112,11 @@ def edit_user():
     org_username = request.form["org_username"]
     username = request.form["username"]
     userclass = request.form["class"]
+    admin = request.form["admin"]
 
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("UPDATE crew_users SET username = ?, class = ? WHERE username = ?", (username, int(userclass), org_username))
+        cur.execute("UPDATE crew_users SET username = ?, class = ?, admin = ? WHERE username = ?", (username, int(userclass), int(admin), org_username))
 
         return "크루원 수정이 완료되었습니다."
 
@@ -136,6 +140,18 @@ def all_users():
             return users
 
         return []
+
+@scrum_api.route("/is_admin", methods=["POST"])
+def is_admin():
+    username = request.form["username"]
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT admin FROM crew_users WHERE username = ?", (username, ))
+        res = cur.fetchall()
+        if len(res) > 0:
+            return str(res[0][0])
+    
+    return "0"
 
 @scrum_api.route("/check_class", methods=["POST"])
 def check_class():

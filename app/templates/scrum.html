@@ -323,9 +323,18 @@
     function create_message() {
         const scrum = document.getElementById("scrum");
         const scrum_datas = scrum.children;
+        let today = new Date();
+        var hour = today.getHours();
+        if(hour < 3) {
+            hour += 24;
+        }
         var message = "⛄새벽크루⛄\n\n";
         for (i = 0; i < scrum_datas.length; i++) {
             const data = scrum_datas[i].children;
+            const current = data[0].innerText.slice(0, 2);
+            if(hour >= current) {
+                continue;
+            }
             var flag = true;
             for (j = 0; j < data.length; j++) {
                 if (data[j].innerHTML == "") {

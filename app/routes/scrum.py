@@ -20,7 +20,7 @@ END_TIME = 26
 def get_today():
     today = datetime.date.today()
     hour = datetime.datetime.today().hour
-    if int(hour) < 5:
+    if int(hour) < 3:
         today -= datetime.timedelta(days=1)
 
     today = today.strftime("%Y-%m-%d")
@@ -60,6 +60,7 @@ def scrum_submit():
     team = int(request.form["team"])
     username = request.form["username"]
 
+
     if username == "undefined":
         return "1"
 
@@ -70,7 +71,13 @@ def scrum_submit():
     
     with db_conn() as conn:
         cur = conn.cursor()
+
+        cur.execute("SELECT 1 FROM crew_users WHERE username = ?", (username, ))
+        res = cur.fetchall()
+        if len(res) == 0:
+            return "1"
         
+
         cur.execute("SELECT idx FROM scrum WHERE date = ? AND time = ? AND team = ?", (today, hour, team))
         scrum_idx = cur.fetchall()
         scrum_idx = (len(scrum_idx) > 0) and scrum_idx[0][0] or -1
@@ -103,7 +110,7 @@ def create_user():
 
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("INSERT INTO crew_users(username, class, admin) VALUES(?,?,?)", (username, userclass, 0))
+        cur.execute("INSERT INTO crew_users(username, class, admin) VALUES(?,?,?)", (username, userclass))
 
         return "크루원 등록이 완료되었습니다."
 
@@ -117,6 +124,7 @@ def edit_user():
     with db_conn() as conn:
         cur = conn.cursor()
         cur.execute("UPDATE crew_users SET username = ?, class = ?, admin = ? WHERE username = ?", (username, int(userclass), int(admin), org_username))
+        cur.execute("UPDATE scrum_member SET member = ? WHERE member = ?", (username, org_username))
 
         return "크루원 수정이 완료되었습니다."
 

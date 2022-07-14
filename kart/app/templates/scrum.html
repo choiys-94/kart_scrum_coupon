@@ -99,7 +99,7 @@
                     style="margin-left: 1rem;">계정을 등록할게요!</button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <input class="form-control" list="datalistOptions" id="username" name="username" placeholder="계정 입력 / 선택" oninput="check_id()">
+            <input class="form-control" id="username" name="username" placeholder="계정 입력 / 선택" onkeyup="check_id()">
             <div class="modal-body" id="modal_users" style="font-size: 2rem;">
                 
             </div>
@@ -165,7 +165,7 @@
                     });
                     setTimeout(() => {
                         document.getElementById("username").focus();
-                    }, 3000);
+                    }, 500);
                 }
             }
         });

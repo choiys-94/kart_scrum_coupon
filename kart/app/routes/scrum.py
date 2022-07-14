@@ -20,7 +20,7 @@ END_TIME = 26
 def get_today():
     today = datetime.date.today()
     hour = datetime.datetime.today().hour
-    if int(hour) < 3:
+    if int(hour) < 5:
         today -= datetime.timedelta(days=1)
 
     today = today.strftime("%Y-%m-%d")
@@ -110,7 +110,7 @@ def create_user():
 
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("INSERT INTO crew_users(username, class, admin) VALUES(?,?,?)", (username, userclass))
+        cur.execute("INSERT INTO crew_users(username, class, admin) VALUES(?,?,?)", (username, userclass, 0))
 
         return "크루원 등록이 완료되었습니다."
 

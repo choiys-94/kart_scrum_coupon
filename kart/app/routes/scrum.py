@@ -27,19 +27,33 @@ def get_today():
 
     return today
 
+@scrum_api.route("/check_id", methods=["POST"])
+def check_id():
+    inp = request.form["inp"]
+    inp = "%" + inp + "%"
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT username, class FROM crew_users WHERE username like ? ORDER BY class ASC", (inp, ))
+        res = cur.fetchall()
+        
+        return json.dumps(res)
+    
+    return "[]"
+
+
 @scrum_api.route("/scrum_state", methods=["GET"])
 def scrum_state():
     today = get_today()
-    with db_conn() as conn:
+    with db_conn() as conn: 
         cur = conn.cursor()
 
-        cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ? order by time asc, team asc", (today, ))
+        cur.execute("SELECT date, time, team, closed, type FROM scrum WHERE date = ? order by time asc, team asc", (today, ))
         res = cur.fetchall()
         if len(res) < (END_TIME - START_TIME + 1):
             for i in range(START_TIME, END_TIME + 1):
-                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed) VALUES(?,?,?,?)", (today, i, 1, 0))
+                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed, type) VALUES(?,?,?,?,?)", (today, i, 1, 0, 0))
 
-            cur.execute("SELECT date, time, team, closed FROM scrum WHERE date = ?", (today, ))
+            cur.execute("SELECT date, time, team, closed, type FROM scrum WHERE date = ? ORDER BY time ASC, team ASC", (today, ))
             res = cur.fetchall()
 
         return json.dumps(res)
@@ -49,16 +63,50 @@ def scrum_data():
     today = get_today()
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("SELECT time, team, member, class FROM (scrum a INNER JOIN scrum_member b ON (a.idx=scrum_idx)) c INNER JOIN crew_users d ON (c.member=d.username) WHERE date = ? ORDER BY class asc", (today, ))
+        cur.execute("SELECT time, team, member, class, type FROM (scrum a INNER JOIN scrum_member b ON (a.idx=scrum_idx)) c INNER JOIN crew_users d ON (c.member=d.username) WHERE date = ? ORDER BY class asc", (today, ))
         res = cur.fetchall()
 
         return json.dumps(res)
 
+@scrum_api.route("/scrum_add", methods=["POST"])
+def scrum_add():
+    hour = request.form["hour"]
+    type = int(request.form["type"])
+    today = get_today()
+    with db_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT idx, team FROM scrum WHERE date = ? AND time = ? AND type = ? ORDER BY team DESC", (today, hour, type))
+        scrum_idx = cur.fetchall()
+        scrum_idx = (len(scrum_idx) > 0) and scrum_idx[0] or -1
+        if scrum_idx != -1:
+            team = scrum_idx[1]
+            scrum_idx = scrum_idx[0]
+        else:
+            team = 1
+            cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed, type) VALUES(?,?,?,?,?)", (today, hour, team, 0, type))
+            return "1"
+
+        cur.execute("SELECT member FROM scrum_member WHERE (scrum_idx = ?)", (scrum_idx, ))
+        scrum_count = cur.fetchall()
+
+        if len(scrum_count) >= 4:
+            team += 1
+            cur.execute("SELECT 1 FROM scrum WHERE date = ? AND time = ? AND team = ? AND type = ?", (today, hour, team, type))
+            res = cur.fetchall()
+            if len(res) == 0:
+                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed, type) VALUES(?,?,?,?,?)", (today, hour, team, 0, type))
+            return "1"
+        
+        return "0"
+
 @scrum_api.route("/scrum_submit", methods=["POST"])
 def scrum_submit():
     hour = request.form["hour"]
+    if int(hour) < 10:
+        hour = "0" + hour
     team = int(request.form["team"])
     username = request.form["username"]
+    type = request.form["type"]
 
 
     if username == "undefined":
@@ -78,7 +126,7 @@ def scrum_submit():
             return "1"
         
 
-        cur.execute("SELECT idx FROM scrum WHERE date = ? AND time = ? AND team = ?", (today, hour, team))
+        cur.execute("SELECT idx FROM scrum WHERE date = ? AND time = ? AND team = ? AND type = ?", (today, hour, team, type))
         scrum_idx = cur.fetchall()
         scrum_idx = (len(scrum_idx) > 0) and scrum_idx[0][0] or -1
 
@@ -93,10 +141,10 @@ def scrum_submit():
         
         if len(scrum_count) >= 4:
             team += 1
-            cur.execute("SELECT 1 FROM scrum WHERE date = ? AND time = ? AND team = ?", (today, hour, team))
+            cur.execute("SELECT 1 FROM scrum WHERE date = ? AND time = ? AND team = ? AND type = ?", (today, hour, team, type))
             res = cur.fetchall()
             if len(res) == 0:
-                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed) VALUES(?,?,?,?)", (today, hour, team, 0))
+                cur.execute("INSERT OR IGNORE INTO scrum(date, time, team, closed, type) VALUES(?,?,?,?,?)", (today, hour, team, 0, type))
             return "1"
 
         cur.execute("INSERT OR IGNORE INTO scrum_member(scrum_idx, member) VALUES(?,?)", (scrum_idx, username))
@@ -150,8 +198,10 @@ def all_users():
         return []
 
 @scrum_api.route("/is_admin", methods=["POST"])
-def is_admin():
-    username = request.form["username"]
+def is_admin(username=""):
+    if username == "":
+        username = request.form["username"]
+    
     with db_conn() as conn:
         cur = conn.cursor()
         cur.execute("SELECT admin FROM crew_users WHERE username = ?", (username, ))
@@ -177,10 +227,11 @@ def check_class():
 def scrum_closed():
     hour = request.form["hour"]
     team = request.form["team"]
+    type = request.form["type"]
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("UPDATE scrum SET closed=ABS(closed-1) WHERE time = ? AND team = ?", (hour, team))
-        cur.execute("SELECT closed FROM scrum WHERE time = ? AND team = ?", (hour, team))
+        cur.execute("UPDATE scrum SET closed=ABS(closed-1) WHERE time = ? AND team = ? AND type = ?", (hour, team, type))
+        cur.execute("SELECT closed FROM scrum WHERE time = ? AND team = ? AND type = ?", (hour, team, type))
         res = cur.fetchall()
         return str(res[0][0])
 

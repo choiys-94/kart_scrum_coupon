@@ -2,6 +2,35 @@
 
 <div class="container w-75"
     style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; margin-top: 10rem;">
+    <h4>시간 추가</h4>
+    <div style="padding: 1rem 1rem 1rem 1rem; background: #ffffff; border-radius: 1rem;">
+        <div class="mb-3">
+            <label for="c_time" class="form-label">
+                <h5>시간</h5>
+            </label>
+            <br />
+            <div id="time_container">
+
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="c_type" class="form-label">
+                <h5>종류</h5>
+            </label>
+            <br />
+            <input type="radio" class="btn-check" name="c_type" id="speed-outlined" autocomplete="off"
+                onclick="select_type(0)">
+            <label class="btn btn-outline-danger" for="speed-outlined">스피드</label>
+            <input type="radio" class="btn-check" name="c_type" id="item-outlined" autocomplete="off"
+                onclick="select_type(1)">
+            <label class="btn btn-outline-warning" for="item-outlined">아이템</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-1" onclick="scrum_add()">확인</button>
+    </div>
+</div>
+
+<div class="container w-75"
+    style="padding: 1rem 1rem 1rem 1rem; background: #eeeeee; border-radius: 1rem; margin-top: 1rem;">
     <h4>계정 추가</h4>
     <div style="padding: 1rem 1rem 1rem 1rem; background: #ffffff; border-radius: 1rem;">
         <div class="mb-3">
@@ -108,7 +137,8 @@
                         <label for="form_userclass">군</label>
                     </div>
                 </div>
-                <div class="form-check form-switch form-check-reverse" style="margin-right: 1rem; margin-bottom: 0.5rem;">
+                <div class="form-check form-switch form-check-reverse"
+                    style="margin-right: 1rem; margin-bottom: 0.5rem;">
                     <label class="form-check-label" for="is_admin">운영진</label>
                     <input class="form-check-input" type="checkbox" role="switch" id="is_admin">
                 </div>
@@ -125,6 +155,8 @@
 
 <script>
     var userclass = "";
+    var time = -1;
+    var type = -1;
     function select_class(c_userclass) {
         userclass = c_userclass;
     }
@@ -162,7 +194,7 @@
         const userclass = userclass_elm.options[userclass_elm.selectedIndex].value;
         const is_admin = $("#is_admin").is(":checked");
         var admin = 0;
-        if(is_admin) {
+        if (is_admin) {
             admin = 1;
         }
 
@@ -219,8 +251,8 @@
                 break;
             }
         }
-        
-        if(admin) {
+
+        if (admin) {
             $("#is_admin").prop("checked", 1);
         }
         else {
@@ -236,10 +268,59 @@
         }
     });
 
+    function select_time(t) {
+        if(t < 10)
+            t = "0" + t;
+        time = t;
+    }
+
+    function select_type(t) {
+        type = t;
+    }
+
+    function scrum_add() {
+        if (time == -1) {
+            alert("시간을 선택해주세요.");
+            return;
+        }
+        if (type == -1) {
+            alert("종류를 선택해주세요.");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/scrum_add",
+            data: "hour=" + time + "&type=" + type,
+            dataType: "text",
+            success: function (data) {
+                alert("시간 생성이 완료되었습니다.");
+                location.href="/scrum";
+            },
+            error: function (data) {
+                alert("시간 생성에 실패했습니다.");
+            }
+        });
+    }
+
+    function time_setting() {
+        let time_container = document.getElementById("time_container");
+        time_container.innerHTML = "";
+        for(var i=5; i<29; i++){
+            t = i;
+            if(i < 10){
+                t = "0" + i;
+            }
+            time_container.innerHTML += `<input type="radio" class="btn-check" name="c_time" id="${t}-outlined" autocomplete="off" onclick="select_time(${t})"><label class="btn btn-outline-primary" style="margin-bottom: 1rem; margin-right: 1rem; width: 5rem;" for="${t}-outlined">${t}</label>`
+        }
+        
+    }
+
     $(document).ready(() => {
         document.getElementById("username_wrapper").style = "display:none;";
     });
-
+    
+    time_setting();
     // setInterval(() => {
     //     scrum_data();
     // }, 1000)

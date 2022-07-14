@@ -1,5 +1,7 @@
 from flask import render_template, send_from_directory, request, make_response
 from . import main
+from .scrum import is_admin
+import urllib.parse
 import sqlite3 as sql
 import datetime
 
@@ -10,7 +12,7 @@ def get_users():
     users = []
     with db_conn() as conn:
         cur = conn.cursor()
-        cur.execute("SELECT username, class, admin FROM crew_users")
+        cur.execute("SELECT username, class, admin FROM crew_users ORDER BY class ASC")
         users = cur.fetchall()
 
     return users
@@ -40,8 +42,14 @@ def scrum():
 def users():
     if request.method == "GET":
         try:
+            flag = False
+            username = urllib.parse.unquote(request.cookies.get("username"))
+            print(username)
+            if is_admin(username) == '1':
+                flag = True
+
             enter = request.cookies.get("f6523489dsg")
-            if enter == "f02938f9sdf_33":
+            if enter == "f02938f9sdf_33" or flag:
                 users = get_users()
                 return render_template("users.html", users=users)
             else:
@@ -52,7 +60,7 @@ def users():
     
     elif(request.method == "POST"):
         password = request.form["password"]
-        if password == "남미새이구용":
+        if password == "새채벽고":
             users = get_users()
             resp = make_response(render_template("users.html", users=users))
             expire_date = datetime.datetime.now() - datetime.timedelta(hours=9) + datetime.timedelta(minutes=10)

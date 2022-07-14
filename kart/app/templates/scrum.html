@@ -1,11 +1,11 @@
 {% include 'header.html' %}
 <div class="username_wrapper" id="username_wrapper">
-    <span id="username_element" style="font-weight: bolder;"></span>
+    <span id="username_element" style="font-weight: bolder;"></span><br/>
     <button type="button" class="btn btn-warning mb-3" id="loginout" onclick="delete_cookie()">나가기</button>
 </div>
-<div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%)">
+<div style="position: absolute; top: 50%; left:50%; transform: translate(-50%, -50%);">
     <div class="container" style="padding: 1rem 1rem 0 1rem; display: flex; justify-content: center;">
-        <span style="display: inline-block; font-size: 2rem; color: white" id="today" onclick="create_message()"></span>
+        <span style="display: inline-block; font-size: 2rem; color: white;" id="today" onclick="create_message()"></span>
     </div>
     <table class="table table-light text-center">
         <thead>
@@ -26,7 +26,7 @@
 </div>
 
 <!-- Hidden Modal Button -->
-<input type="hidden" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"
+<input type="hidden" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal2"
     id="modal_trigger"></input>
 
 <!-- Modal -->
@@ -82,8 +82,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-danger" data-bs-target="#myModal2"
-                        data-bs-toggle="modal">이미 계정이 있어요!</button>
+                    <button class="btn btn-secondary" data-bs-target="#myModal2" data-bs-toggle="modal">이전</button>
                     <button type="button" class="btn btn-primary" onclick="create_account()">등록</button>
                 </div>
             </div>
@@ -91,34 +90,18 @@
     </div>
 </div>
 
-<div class="modal fade" id="myModal2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+<div class="modal fade" id="myModal2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel2">계정을 선택해주세요.</h5>
+                <button type="button" class="btn btn-outline-danger" data-bs-target="#myModal" data-bs-toggle="modal"
+                    style="margin-left: 1rem;">계정을 등록할게요!</button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="font-size: 2rem;">
-                {% for user in users %}
-                <span onclick="select_user('{{ user[0] }}')">
-                    {{ user[0] }}
-                    (
-                    {% if user[1] == 7 %}
-                    일반
-                    {% elif user[1] == 2 %}
-                    주력
-                    {% elif user[1] == 1 %}
-                    강주력
-                    {% else %}
-                    {{ user[1] - 2 }}군
-                    {% endif %}
-                    )
-                </span>
-                <br />
-                {% endfor %}
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" data-bs-target="#myModal" data-bs-toggle="modal">이전</button>
+            <input class="form-control" list="datalistOptions" id="username" name="username" placeholder="계정 입력 / 선택" oninput="check_id()">
+            <div class="modal-body" id="modal_users" style="font-size: 2rem;">
+                
             </div>
         </div>
     </div>
@@ -128,7 +111,7 @@
 
 </body>
 
-<button id="users_button" class="btn btn-info" onclick="location.href='/users'">회원관리</button>
+<button id="users_button" class="btn btn-info" onclick="location.href='/users'">관리</button>
 
 <script>
     const class_color = {
@@ -144,6 +127,48 @@
     var userclass = "";
     function select_class(c_userclass) {
         userclass = c_userclass;
+    }
+
+    function check_id() {
+        let username = document.getElementById("username").value;
+
+        $.ajax({
+            type: "POST",
+            url: "/api/scrum/check_id",
+            data: "inp=" + username,
+            dataType: "text",
+            success: function (data) {
+                if (data == "Error") {
+                    
+                }
+                else {
+                    let users = JSON.parse(data);
+                    let modal_users = document.getElementById("modal_users");
+                    modal_users.innerHTML = "";
+                    users.forEach(user => {
+                        var user_class = "";
+                        switch(user[1]) {
+                            case 7:
+                                user_class = "일반";
+                                break;
+                            case 2:
+                                user_class = "주력";
+                                break;
+                            case 1:
+                                user_class = "강주력";
+                                break;
+                            default:
+                                user_class = `${user[1] - 2}군`;
+                                break;
+                        }
+                        modal_users.innerHTML += `<span style='color: ${class_color[user[1]]}' onclick="select_user('${user[0]}')">${user[0]} ( ${user_class} )</span><br />`;
+                    });
+                    setTimeout(() => {
+                        document.getElementById("username").focus();
+                    }, 3000);
+                }
+            }
+        });
     }
 
     function create_account() {
@@ -174,7 +199,7 @@
     }
 
     function set_cookie(username) {
-        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2023 00:00:10 GMT;admin=";
+        document.cookie = "username=" + encodeURIComponent(username) + "; expires=Thu, 01 Jan 2024 00:00:10 GMT;admin=";
     }
 
     function delete_cookie() {
@@ -206,7 +231,7 @@
         });
     }
 
-    function scrum_submit(hour, team) {
+    function scrum_submit(hour, team, type=0) {
         let username = get_username();
         if (username == "undefined" || username == undefined)
             location.reload;
@@ -217,7 +242,7 @@
             $.ajax({
                 type: "POST",
                 url: "/api/scrum/scrum_submit",
-                data: `username=${username}&hour=${hour}&team=${team}`,
+                data: `username=${username}&hour=${hour}&team=${team}&type=${type}`,
                 dataType: "text",
                 success: function (data) {
                     scrum_data();
@@ -238,6 +263,7 @@
                     const team = d[1];
                     const member = d[2];
                     let userclass = d[3];
+                    const type = d[4];
                     let template = `<span style="color:${class_color[userclass]};" class="${userclass}">`;
                     if (userclass == 1) {
                         userclass = "강";
@@ -251,7 +277,7 @@
                     else {
                         userclass = "일"
                     }
-                    const row = document.getElementById(`scrum_${hour}_${team}`);
+                    const row = document.getElementById(`scrum_${hour}_${team}_${type}`);
                     const children = row.children;
                     for (i = 1; i < children.length; i++) {
                         if (children[i].innerHTML == "") {
@@ -276,19 +302,32 @@
                     const hour = d[1];
                     const team = d[2];
                     const closed = d[3];
+                    const type = d[4];
                     const admin_template = {
                         "0": "",
-                        "1": ` onclick="req_closed(${hour}, ${team})"`,
+                        "1": ` onclick="req_closed(${hour}, ${team}, ${type})"`,
                     }
 
+                    const item = "[템]"
                     var closed_template = ` class="table-danger"`;
                     if (closed == '0')
                         closed_template = "";
                     if (team > 1) {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th${admin_template[admin]}>${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                        if(type){
+                            scrum.innerHTML += `<tr id="scrum_${hour}_${team}_${type}"${closed_template}><th${admin_template[admin]}>${hour}시${item}(${team})</th><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td></tr>`;
+                        }
+                        else{
+                            scrum.innerHTML += `<tr id="scrum_${hour}_${team}_${type}"${closed_template}><th${admin_template[admin]}>${hour}시(${team})</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                        }
                     }
                     else {
-                        scrum.innerHTML += `<tr id="scrum_${hour}_${team}"${closed_template}><th${admin_template[admin]}>${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                        if(type){
+                            scrum.innerHTML += `<tr id="scrum_${hour}_${team}_${type}"${closed_template}><th${admin_template[admin]}>${hour}시${item}</th><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td><td onclick="scrum_submit(${hour}, ${team}, 1)"></td></tr>`;
+                        }
+                        else{
+                            scrum.innerHTML += `<tr id="scrum_${hour}_${team}_${type}"${closed_template}><th${admin_template[admin]}>${hour}시</th><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td><td onclick="scrum_submit(${hour}, ${team})"></td></tr>`;
+                            
+                        }
                     }
                 });
 
@@ -325,14 +364,15 @@
         const scrum_datas = scrum.children;
         let today = new Date();
         var hour = today.getHours();
-        if(hour < 3) {
+        if (hour < 5) {
             hour += 24;
         }
         var message = "⛄새벽크루⛄\n\n";
         for (i = 0; i < scrum_datas.length; i++) {
             const data = scrum_datas[i].children;
             const current = data[0].innerText.slice(0, 2);
-            if(hour >= current) {
+            console.log(current);
+            if (hour >= current) {
                 continue;
             }
             var flag = true;
@@ -346,7 +386,7 @@
                 message += `${data[0].innerText} `
                 for (j = 1; j < data.length; j++) {
                     const userclass = data[j].children[0].className;
-                    if (userclass == 1) message += "강주 ";
+                    if (userclass == 1) message += "강 ";
                     else if (userclass == 2) message += "주 ";
                     else if (userclass == 7) message += "일 ";
                     else message += `${userclass - 2} `;
@@ -368,11 +408,11 @@
         document.execCommand("copy");
     }
 
-    function req_closed(hour, team) {
+    function req_closed(hour, team, type) {
         $.ajax({
             type: "POST",
             url: "/api/scrum/scrum_closed",
-            data: `hour=${hour}&team=${team}`,
+            data: `hour=${hour}&team=${team}&type=${type}`,
             dataType: "text",
             success: function (data) {
                 scrum_data()
@@ -388,6 +428,7 @@
     // }
 
     $(document).ready(() => {
+        check_id();
         const username = get_username();
         var loginout = document.getElementById("loginout");
         if (username == "undefined") {

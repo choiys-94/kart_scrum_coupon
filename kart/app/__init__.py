@@ -11,7 +11,7 @@ def create_app():
     with db_conn() as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS coupon_users (idx integer primary key, username text, userid text)")
         conn.execute("CREATE TABLE IF NOT EXISTS crew_users (idx integer primary key, username text unique, class integer, admin integer)")
-        conn.execute("CREATE TABLE IF NOT EXISTS scrum (idx integer primary key, date text, time text, team text, closed integer)")
+        conn.execute("CREATE TABLE IF NOT EXISTS scrum (idx integer primary key, date text, time text, team text, closed integer, type integer)")
         conn.execute("CREATE TABLE IF NOT EXISTS scrum_member (idx integer primary key, scrum_idx integer, member text)")
 
         print("[*] init database complete")

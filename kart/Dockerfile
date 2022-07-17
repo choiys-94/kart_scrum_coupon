@@ -7,6 +7,8 @@ COPY requirements.txt ./
 RUN pip install -U pip
 RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /kart
-RUN ["chmod", "+x", "run.sh"]
 
-CMD [ "./run.sh" ]
+# RUN ["chmod", "777", "run.sh"]
+
+CMD [ "gunicorn", "run:app", "--workers=1", "--bind=0.0.0.0:5000", "--timeout=10", "--worker-class=gevent", "--log-level=debug"]
+# gunicorn run:app -w 1 -b 0.0.0.0:5000 --timeout=10 -k gevent --log-level=debug

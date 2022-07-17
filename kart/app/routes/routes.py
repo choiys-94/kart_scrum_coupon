@@ -51,7 +51,13 @@ def users():
             enter = request.cookies.get("f6523489dsg")
             if enter == "f02938f9sdf_33" or flag:
                 users = get_users()
-                return render_template("users.html", users=users)
+                cnts = [0, 0, 0, 0, 0, 0, 0]
+
+                for user in users:
+                    cnts[int(user[1])-1] += 1
+                
+                msg = f"{len(users)}명(강주 {cnts[0]}명, 주력 {cnts[1]}명, 1군 {cnts[2]}명, 2군 {cnts[3]}명, 3군 {cnts[4]}명, 4군 {cnts[5]}명, 일반 {cnts[6]}명)"
+                return render_template("users.html", users=users, msg=msg)
             else:
                 return render_template("users_enter.html")
 

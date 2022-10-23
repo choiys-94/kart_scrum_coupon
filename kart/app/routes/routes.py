@@ -66,7 +66,7 @@ def users():
     
     elif(request.method == "POST"):
         password = request.form["password"]
-        if password == "새채벽고":
+        if password == "배고픈고먐미":
             users = get_users()
             resp = make_response(render_template("users.html", users=users))
             expire_date = datetime.datetime.now() - datetime.timedelta(hours=9) + datetime.timedelta(minutes=10)

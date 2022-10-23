@@ -383,7 +383,13 @@
                 }
             }
             if (flag) {
-                message += `${data[0].innerText} `
+                if (current > 24) {
+                    const h = current - 24;
+                    message += `0${h}시 `;
+                }
+                else {
+                    message += `${data[0].innerText} `;
+                }
                 for (j = 1; j < data.length; j++) {
                     const userclass = data[j].children[0].className;
                     if (userclass == 1) message += "강 ";

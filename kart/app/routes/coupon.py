@@ -58,6 +58,8 @@ def check_coupon():
         return "{\"result\":\"false\", \"message\":\"계정 번호를 정확히 입력해주세요.\"}"
     elif "\"code\":91002" in r.text:
         return "{\"result\":\"false\", \"message\":\"쿠폰 번호를 정확히 입력해주세요.\"}"
+    elif "\"code\":90433" in r.text:
+        return "{\"result\":\"false\", \"message\":\"쿠폰 서버가 점검중입니다.\"}"
     elif "\"result\":true" in r.text:
         return r.text
     else:
@@ -89,6 +91,23 @@ def submit_coupon():
     # r = requests.post("https://mcoupon.nexon.com/kartrush/useGiftCoupon", headers=headers, json=data, verify=False)
     r = requests.post("https://mcoupon.nexon.com/kartrush/coupon/api/v1/redeem-coupon-by-npacode", headers=headers, json=data, verify=False)
     print(r.text)
+
+    if "\"code\":2200" in r.text:
+        return "{\"result\":\"false\", \"message\":\"이미 사용한 쿠폰 입니다.\"}"        
+    elif "\"code\":1101" in r.text:
+        return "{\"result\":\"false\", \"message\":\"잘못된 쿠폰번호 입니다.\"}"
+    elif "\"code\":1105" in r.text:
+        return "{\"result\":\"false\", \"message\":\"다른 유저가 이미 사용한 쿠폰입니다.\"}"
+    elif "\"code\":91001" in r.text:
+        return "{\"result\":\"false\", \"message\":\"계정 번호를 정확히 입력해주세요.\"}"
+    elif "\"code\":91002" in r.text:
+        return "{\"result\":\"false\", \"message\":\"쿠폰 번호를 정확히 입력해주세요.\"}"
+    elif "\"code\":90433" in r.text:
+        return "{\"result\":\"false\", \"message\":\"쿠폰 서버가 점검중입니다.\"}"
+    elif "\"result\":true" in r.text:
+        return r.text
+    else:
+        return "{\"result\":\"false\", \"message\":\"쿠폰 확인 오류\"}"
 
     return "1"
 

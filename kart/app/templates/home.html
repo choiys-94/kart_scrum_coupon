@@ -26,9 +26,11 @@
             </label>
             <input type="text" class="form-control" id="coupon" name="coupon" placeholder="쿠폰코드 입력">
         </div>
-        <div class="mb-3">
+        <!-- <div class="mb-3"> -->
             <button type="button" class="btn btn-primary mb-3" onclick="check_coupon()">확인</button>
-        </div>
+            <button type="button" class="btn btn-danger mb-3" style="float: right" onclick="submit_all()">전체 보내기</button>
+        <!-- </div> -->
+        <p style="padding-bottom: 1rem; color: #999999"><span style="color: #dc3545">전체 보내기</span>는 쿠폰코드만 입력</p>
     </div>
 
     <div style="margin-top: 3rem;"></div>
@@ -115,6 +117,7 @@
             data: "userid=" + userid + "&coupon=" + coupon,
             dataType: "json",
             success: function (data) {
+                console.log(data);
                 if (data.result == "false") {
                     alert(data.message);
                 }
@@ -123,6 +126,21 @@
                     if (confirm("계정명이 " + data.name + " 이(가) 맞습니까?")) {
                         submit_coupon(userid, coupon, data.id, data.name);
                     }
+                }
+            }
+        });
+    }
+
+    function submit_all() {
+        $.ajax({
+            type: "POST",
+            url: "/api/coupon/submit_all",
+            data: "&coupon=" + coupon,
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data) {
+                    alert(data.join(", ") + "완료");
                 }
             }
         });

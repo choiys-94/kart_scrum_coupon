@@ -21,9 +21,9 @@
             <input type="radio" class="btn-check" name="c_type" id="speed-outlined" autocomplete="off"
                 onclick="select_type(0)">
             <label class="btn btn-outline-danger" for="speed-outlined">스피드</label>
-            <input type="radio" class="btn-check" name="c_type" id="item-outlined" autocomplete="off"
+            <!-- <input type="radio" class="btn-check" name="c_type" id="item-outlined" autocomplete="off"
                 onclick="select_type(1)">
-            <label class="btn btn-outline-warning" for="item-outlined">아이템</label>
+            <label class="btn btn-outline-warning" for="item-outlined">아이템</label> -->
         </div>
         <button type="button" class="btn btn-primary mb-1" onclick="scrum_add()">확인</button>
     </div>
@@ -318,6 +318,7 @@
 
     $(document).ready(() => {
         document.getElementById("username_wrapper").style = "display:none;";
+        select_type(0);
     });
     
     time_setting();

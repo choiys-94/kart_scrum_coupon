@@ -136,6 +136,9 @@ def submit_all():
     }
 
     response = []
+
+    print(userlist)
+    print(coupon)
     for userid in userlist:
         data = {
             # "npaCode": "07901CQ10406Q",
@@ -151,7 +154,7 @@ def submit_all():
         # {"result":true,"info":[{"id":"16520000001680394","name":"첫사랑선이"}]}
         if "\"result\":true" in r.text:
             res = r.json()
-            account_id, account_name = res["info"]["id"], res["info"]["name"]
+            account_id, account_name = res["info"][0]["id"], res["info"][0]["name"]
             print(account_id, account_name)
             data = {
                 "npaCode": userid,

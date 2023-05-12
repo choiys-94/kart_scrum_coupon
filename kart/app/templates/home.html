@@ -132,15 +132,17 @@
     }
 
     function submit_all() {
+        let coupon = document.getElementById("coupon").value;
+
         $.ajax({
             type: "POST",
             url: "/api/coupon/submit_all",
-            data: "&coupon=" + coupon,
+            data: "coupon=" + coupon,
             dataType: "json",
             success: function (data) {
                 console.log(data);
                 if (data) {
-                    alert(data.join(", ") + "완료");
+                    alert(data.join(", ") + "\n완료");
                 }
             }
         });
